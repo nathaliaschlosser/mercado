@@ -1,24 +1,6 @@
-name: pipeline
+name: Defense & Hardened Security Pipeline
 
 on:
-  push
-
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout do código
-        uses: actions/checkout@v4
-
-        name: Defense & Hardened Security Pipeline
-
-# ------------------------------------------------------------------------------
-# CONTROLE DE GATILHOS (TRIGGERS)
-# ------------------------------------------------------------------------------
-on:
-  # O pipeline NÃO executa via push direto na main se o ambiente estiver correto,
-  # mas se alguém tentar forçar um push, o job 'prevent-direct-push' irá falhar imediatamente.
   push:
     branches:
       - main
@@ -29,25 +11,16 @@ on:
       - master
     types: [opened, synchronize, reopened, ready_for_review]
 
-# Concorrência: Cancela execuções anteriores da mesma branch em novos commits,
-# impedindo ataques de negação de serviço (DoS) por excesso de builds.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# ------------------------------------------------------------------------------
-# PERMISSÕES MÍNIMAS (Princípio do Menor Privilégio)
-# Por padrão, revoga TODAS as permissões do repositório neste workflow.
-# ------------------------------------------------------------------------------
 permissions:
   contents: read
 
 jobs:
-  # ============================================================================
-  # JOB 1: BLOQUEIO E VALIDAÇÃO DE REGRA DE BRANCH
-  # ============================================================================
   prevent-direct-push:
-    name: 🛡️ Validação de Push e Estritura de Branch
+    name: 🛡️ Validação de Push e Estrutura de Branch
     runs-on: ubuntu-latest
     steps:
       - name: Bloquear Push Direto na Main/Master
@@ -69,9 +42,6 @@ jobs:
           fi
           echo "✅ Origem de branch validada com sucesso."
 
-  # ============================================================================
-  # JOB 2: AUDITORIA DE SEGURANÇA E SEGREDOS VAZADOS
-  # ============================================================================
   security-audit:
     name: 🔍 Auditoria de Código e Credenciais Expostas
     runs-on: ubuntu-latest
@@ -80,31 +50,13 @@ jobs:
       - name: Checkout seguro do repositório
         uses: actions/checkout@v4
         with:
-          # Baixa o histórico completo para permitir verificação do Git
           fetch-depth: 0
 
-      # Garante que nenhum Token, Senha ou Chave privada foi comitada por engano
       - name: Varredura de Segredos (TruffleHog)
         uses: trufflesecurity/trufflehog-actions-scan@v3.82.6
         with:
           extra_args: --debug --only-verified
 
-      # Verifica se arquivos sensíveis da infraestrutura foram alterados no PR
-      - name: Proteger Arquivos Críticos de Infraestrutura
-        if: github.event_name == 'pull_request'
-        run: |
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }} HEAD)
-          echo "Arquivos modificados no PR:"
-          echo "$CHANGED_FILES"
-          
-          # Bloqueia alteração nos workflows por colaboradores sem revisão explícita
-          if echo "$CHANGED_FILES" | grep -E '^\.github/workflows/'; then
-            echo "⚠️ [ALERTA DE SEGURANÇA]: Este PR tenta modificar arquivos de pipeline (.github/workflows/)!"
-          fi
-
-  # ============================================================================
-  # JOB 3: VALIDAÇÃO DE QUALIDADE E BUILD DA APLICAÇÃO
-  # ============================================================================
   build-and-verify:
     name: ⚙️ Build Seguro e Testes
     runs-on: ubuntu-latest
@@ -113,7 +65,6 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      # Ajuste os passos abaixo de acordo com a sua linguagem/tecnologia
-      - name: Exemplo de Validação do Código
+      - name: Validação do Código
         run: |
           echo "✅ Código validado com sucesso. Todos os testes de segurança passaram."
