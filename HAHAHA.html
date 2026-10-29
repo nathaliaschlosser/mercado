@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasmas Glitch</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #050505;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: monospace;
+        }
+
+        /* Efeito de scanline e estática de TV antiga */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 999;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+
+        .ghost {
+            position: absolute;
+            font-size: 3rem;
+            color: #00ffcc;
+            user-select: none;
+            animation: fly linear infinite, glitch 0.3s infinite;
+            filter: drop-shadow(0 0 8px rgba(0, 255, 204, 0.8));
+        }
+
+        /* Animação de movimento pela tela */
+        @keyframes fly {
+            0% {
+                transform: translate(-100px, var(--start-y));
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(calc(100vw + 100px), var(--end-y));
+                opacity: 0;
+            }
+        }
+
+        /* Efeito de falha/glitch visual */
+        @keyframes glitch {
+            0% {
+                text-shadow: 2px 0 #ff0055, -2px 0 #00ffff;
+                transform: skew(0deg);
+            }
+            20% {
+                text-shadow: -3px -1px #ff0055, 3px 1px #00ffff;
+                transform: skew(10deg);
+            }
+            40% {
+                text-shadow: 2px 2px #ff0055, -2px -2px #00ffff;
+                transform: skew(-10deg);
+            }
+            60% {
+                text-shadow: -1px 2px #ff0055, 1px -2px #00ffff;
+                transform: skew(5deg);
+            }
+            80% {
+                text-shadow: 3px -2px #ff0055, -3px 2px #00ffff;
+                transform: skew(-5deg);
+            }
+            100% {
+                text-shadow: 2px 0 #ff0055, -2px 0 #00ffff;
+                transform: skew(0deg);
+            }
+        }
+
+        .title {
+            color: #00ffcc;
+            font-size: 2rem;
+            text-shadow: 3px 3px #ff0055, -3px -3px #00ffff;
+            animation: glitch 0.2s infinite;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="title">SYSTEM ERROR: GHOSTS DETECTED</div>
+
+    <script>
+        // Função para gerar vários fantasmas dinamicamente
+        function createGhost() {
+            const ghost = document.createElement('div');
+            ghost.classList.add('ghost');
+            ghost.innerHTML = '👻';
+
+            // Posições aleatórias de início e fim na altura da tela
+            const startY = Math.random() * window.innerHeight;
+            const endY = startY + (Math.random() * 200 - 100);
+            
+            ghost.style.setProperty('--start-y', `${startY}px`);
+            ghost.style.setProperty('--end-y', `${endY}px`);
+
+            // Velocidade e tamanho variados
+            const duration = Math.random() * 4 + 3; // entre 3 e 7 segundos
+            const size = Math.random() * 2 + 2; // entre 2rem e 4rem
+            
+            ghost.style.animationDuration = `${duration}s, 0.3s`;
+            ghost.style.fontSize = `${size}rem`;
+            ghost.style.top = '0px';
+
+            document.body.appendChild(ghost);
+
+            // Remove o elemento da tela após o término da animação para economizar memória
+            setTimeout(() => {
+                ghost.remove();
+            }, duration * 1000);
+        }
+
+        // Cria um novo fantasma a cada 400 milissegundos
+        setInterval(createGhost, 400);
+    </script>
+
+</body>
+</html>
