@@ -23,3 +23,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 6000);
   });
 });
+function createGhost() {
+  const ghost = document.createElement('div');
+  ghost.classList.add('ghost');
+  ghost.innerHTML = '👻';
+
+  const startY = Math.random() * window.innerHeight;
+  const endY = startY + (Math.random() * 200 - 100);
+
+  ghost.style.setProperty('--start-y', `${startY}px`);
+  ghost.style.setProperty('--end-y', `${endY}px`);
+
+  const duration = Math.random() * 4 + 3;
+  const size = Math.random() * 2 + 2;
+
+  ghost.style.animationDuration = `${duration}s, 0.3s`;
+  ghost.style.fontSize = `${size}rem`;
+  ghost.style.top = '0px';
+
+  document.body.appendChild(ghost);
+
+  setTimeout(() => {
+    ghost.remove();
+  }, duration * 1000);
+}
+
+setInterval(createGhost, 400);
